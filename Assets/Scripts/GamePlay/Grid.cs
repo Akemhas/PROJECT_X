@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace PROJECT_X
@@ -10,7 +9,8 @@ namespace PROJECT_X
 		[SerializeField] private Vector2 gridOffset;
 		[SerializeField] [Range(-2.25f,2.25f)] private float cameraOffset;
 
-		private List<Cell> _cells = new List<Cell>();
+		public static Cell[][] Cells;
+
 		private Camera _mainCam;
 
 		private void Awake()
@@ -28,19 +28,34 @@ namespace PROJECT_X
 
 			InitializeGrid();
 		}
-		[ContextMenu("Initialize Grid")]
+
 		private void InitializeGrid()
 		{
 			DestroyGrid();
-			_cells = new List<Cell>();
+
+			if(gridSize.x < 1) gridSize.x = 1;
+			if(gridSize.y < 1) gridSize.y = 1;
+
+			Cells = new Cell[gridSize.x][];
+
+			for(int i = 0; i < gridSize.x; i++) Cells[i] = new Cell[gridSize.y];
+
 			Vector3 startOffset = new Vector3((gridSize.x - 1) * gridOffset.x * .5f,(gridSize.y - 1) * gridOffset.y * .5f,0);
 			Vector3 startPos = transform.position - startOffset;
 
 			for(int i = 0; i < gridSize.x * gridSize.y; i++)
 			{
-				Vector3 insPos = startPos + new Vector3(i % gridSize.x * gridOffset.x,i / gridSize.x * gridOffset.y);
+				int column = i % gridSize.x;
+				int row = i / gridSize.x;
+
+				Vector3 insPos = startPos + new Vector3(column * gridOffset.x,row * gridOffset.y);
 				Cell insCell = Instantiate(cellPrefab,insPos,Quaternion.identity,transform);
-				_cells.Add(insCell);
+
+				insCell.cellPos.x = column;
+				insCell.cellPos.y = row;
+
+				insCell.name += $"_{i}";
+				Cells[column][row] = insCell;
 			}
 		}
 
